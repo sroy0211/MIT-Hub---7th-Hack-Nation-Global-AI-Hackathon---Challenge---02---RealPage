@@ -34,10 +34,21 @@ The self-check cell (cell 6) prints PASS on all 11 checks. score.py and the dev 
 ## How to run
 
 1. Open `housing_law_navigator.ipynb` in Google Colab.
-2. Add your Anthropic key as a Colab secret named `ANTHROPIC_API_KEY`.
-3. Put the participant pack (`MIT-hackathon-PARTICIPANT-PACK-CLEAN-NO-HOUR16.zip`, unzipped) in Google Drive and set the pack path in the setup cell.
-4. Run the cells in order: setup, Module A extraction (cached per document in `extract_cache/`, so reruns are free), cell 3 (rule build, re-anchoring and collapse), cell 4 (rule-based duplicate drop, geocoding cached in `jurisdictions.json`, coverage and lookups), cell 5 (change tests), cell 6 (self-check), cell 7 (export), cell 8 (demo app).
-5. Outputs are written to the output folder.
+2. Add your Anthropic key as a Colab secret named `ANTHROPIC_API_KEY` (key icon in the left panel).
+3. Unzip the participant pack (`MIT-hackathon-PARTICIPANT-PACK-CLEAN-NO-HOUR16.zip`) into your Google Drive.
+4. **Edit the two paths in the setup cell (Cell 0)** so they point at your Drive:
+
+   ```python
+   PACK = '/content/drive/MyDrive/<your folder>/participant-final-no-hour16'
+   OUT  = '/content/drive/MyDrive/<your folder>/housing_nav_out'
+   ```
+
+   `PACK` is the unzipped pack. `OUT` is where outputs and caches are written; it is created if missing.
+5. **To reproduce our exact run with no API calls,** copy the `extract_cache/` folder from this repo into `OUT` before running. Without it, Module A re-extracts all 87 documents with Claude, which costs credits and can produce slightly different records.
+6. Use **Runtime > Restart session and run all.** Cells, in order: setup, data inspection, Module A extraction (cached per document in `extract_cache/`), cell 3 (quote snapping, re-anchoring and collapse), cell 4 (rule-based duplicate drop, geocoding cached in `jurisdictions.json`, coverage and lookups), cell 5 (change tests T1 to T5), cell 6 (self-check), cell 7 (export).
+7. Outputs are written to `OUT`. Expected result: 52 rules, every cell 6 check printing PASS, and T1 to T5 = (250, 0), (89, 0), (140, 89), (110, 0), (0, 0).
+
+The live demo runs `app.py` on Hugging Face Spaces, using the same lookup engine over `rules_full.json`, `jurisdictions.json` and the sample addresses.
 
 ## Output files
 
