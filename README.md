@@ -1,4 +1,4 @@
-# Lease Lookup: which laws cover this apartment, and why
+# Lease Lookup: which laws cover this apartment, and why?
 
 **Hack-Nation × RealPage, Challenge 2 (Rental Housing Law Navigator)** · Team **Corpus Juris AI** (Souvik Roy, University of Wisconsin–Madison)
 
