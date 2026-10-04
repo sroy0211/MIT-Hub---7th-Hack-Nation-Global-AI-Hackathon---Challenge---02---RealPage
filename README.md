@@ -8,11 +8,11 @@ Give it an apartment address and it tells you which renter rules apply on a give
 
 - **Live demo:** https://huggingface.co/spaces/sroy0211/lease-lookup
   
-- **Videos:** [team intro] -
+- **Videos:** [team intro] - https://drive.google.com/file/d/1FLzm9dR7QcnO0HrgNF7Iikj1K7Ylg51o/view?usp=sharing
 
-- [demo] -
+- [demo] - https://drive.google.com/file/d/1XfcVi_k152irSxqk7KWmVcZIzaaUgunR/view?usp=sharing
 
-- [technical walkthrough] - 
+- [technical walkthrough] - https://drive.google.com/file/d/1eEQx5aWnlgrk3qcqyxm0w6ELDycIdy-U/view?usp=sharing
 
 ## What the live demo does
 
@@ -119,4 +119,3 @@ Add the new documents to the corpus and the addresses to the sample. Extraction,
 MIT, per the Hack-Nation terms. See `LICENSE`.
 
 *Not legal advice. Summaries of law here are for a prototype.*
-Displaying README.md.
