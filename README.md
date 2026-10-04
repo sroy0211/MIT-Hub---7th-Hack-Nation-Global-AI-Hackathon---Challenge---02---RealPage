@@ -4,9 +4,14 @@
 
 Given any sample apartment address, the system answers: which housing rules apply here on the query date, and how do the five supplied change cases (T1 to T5) affect the answer?
 
-- **Live demo:** [add Hugging Face Space link]
-- **Team:** [team name and members]
-- **Videos:** [team intro] · [demo] · [technical walkthrough]
+- **Live demo:** Hugging Face Space link - https://huggingface.co/spaces/sroy0211/lease-lookup
+- **Team:** [Corpus Juris AI and Souvik Roy]
+- **Videos:** [team intro] -
+
+- [demo] -
+  
+- [technical walkthrough] -
+  
 
 ## Results at a glance (as of 2026-10-01)
 
