@@ -1,17 +1,26 @@
-# Rental Housing Law Navigator (Hack-Nation x RealPage, Challenge 2)
+# Lease Lookup: which laws cover this apartment, and why
 
-**Not legal advice.** This is a hackathon prototype. Every answer cites its source text, retrieval date and as-of date.
+**Hack-Nation × RealPage, Challenge 2 (Rental Housing Law Navigator)** · Team **Corpus Juris AI** (Souvik Roy, University of Wisconsin–Madison)
 
-Given any sample apartment address, the system answers: which housing rules apply here on the query date, and how do the five supplied change cases (T1 to T5) affect the answer?
+**Not legal advice.** This is a hackathon prototype. Every answer cites its source, quotes the source text, and shows the as-of date. Retrieval dates are shown where they were recorded.
 
-- **Live demo:** Hugging Face Space link - https://huggingface.co/spaces/sroy0211/lease-lookup
-- **Team:** [Corpus Juris AI and Souvik Roy]
+Give it an apartment address and it tells you which renter rules apply on a given date, explains each one in plain language with a citation, and shows how pending or new laws would change the answer.
+
+- **Live demo:** https://huggingface.co/spaces/sroy0211/lease-lookup
+  
 - **Videos:** [team intro] -
 
 - [demo] -
-  
-- [technical walkthrough] -
-  
+
+- [technical walkthrough] - 
+
+## What the live demo does
+
+- **Sample addresses:** search all 500 addresses in the pack, or click one of the showcase cases: Jersey City or Hoboken (FAIR Act conflict), postal city is not the legal city, legal city could not be confirmed, and Boston.
+- **Any address (live):** type any California, New Jersey or Massachusetts address. The U.S. Census Geocoder finds its legal city, and you can add unit count and year built if you know them. Blank facts stay unknown.
+- **Two dates and a what-if switch:** pick an "answer as of" date and a comparison date, or assume pending bills pass. The app lists exactly which results flip and why.
+- **Rule cards:** each rule shows a status badge (applies, unknown, superseded by local law, enacted but not yet in effect, pending), a plain-language requirement, the reason for the result, a verbatim quote, the citation and a source link.
+- **All rules tab:** filter the 52 rules by state, topic and source.
 
 ## Results at a glance (as of 2026-10-01)
 
@@ -22,7 +31,7 @@ Given any sample apartment address, the system answers: which housing rules appl
 | Schema valid / verbatim quoted spans | 52/52 · 52/52 |
 | Sample addresses with lookups | 500/500 |
 | Addresses resolved to a legal city by the Census Geocoder | 484 (16 no match, reported as unknown at city level) |
-| Lookup results | applies 2,770 · unknown 1,395 · pending 362 · superseded 143 · not_yet_effective 140 |
+| Lookup results | applies 2,704 · unknown 1,411 · pending 362 · superseded 143 · not_yet_effective 140 |
 
 ### Change tests (affected addresses, conflict flags)
 
@@ -50,10 +59,10 @@ The self-check cell (cell 6) prints PASS on all 11 checks. score.py and the dev 
 
    `PACK` is the unzipped pack. `OUT` is where outputs and caches are written; it is created if missing.
 5. **To reproduce our exact run with no API calls,** copy the `extract_cache/` folder from this repo into `OUT` before running. Without it, Module A re-extracts all 87 documents with Claude, which costs credits and can produce slightly different records.
-6. Use **Runtime > Restart session and run all.** Cells, in order: setup, data inspection, Module A extraction (cached per document in `extract_cache/`), cell 3 (quote snapping, re-anchoring and collapse), cell 4 (rule-based duplicate drop, geocoding cached in `jurisdictions.json`, coverage and lookups), cell 5 (change tests T1 to T5), cell 6 (self-check), cell 7 (export).
-7. Outputs are written to `OUT`. Expected result: 52 rules, every cell 6 check printing PASS, and T1 to T5 = (250, 0), (89, 0), (140, 89), (110, 0), (0, 0).
+6. Use **Runtime > Restart session and run all.** Cells, in order: setup, data inspection, Module A extraction (cached per document in `extract_cache/`), cell 3 (quote snapping, re-anchoring and collapse), cell 4 (rule-based duplicate drop, Los Angeles RSO cutoff, geocoding cached in `jurisdictions.json`, coverage and lookups), cell 5 (change tests T1 to T5), cell 6 (self-check), cell 7 (export).
+7. Outputs are written to `OUT`. Expected result: 52 rules, 4 duplicates dropped, 2 RSO rules patched, every cell 6 check printing PASS, and T1 to T5 = (250, 0), (89, 0), (140, 89), (110, 0), (0, 0).
 
-The live demo runs `app.py` on Hugging Face Spaces, using the same lookup engine over `rules_full.json`, `jurisdictions.json` and the sample addresses.
+To run the demo yourself, put `app.py`, `requirements.txt`, `rules_full.json`, `jurisdictions.json` and the pack's `sample_addresses.csv` in one folder and run `python app.py`. The app uses the same lookup engine as the notebook.
 
 ## Output files
 
@@ -62,7 +71,7 @@ The live demo runs `app.py` on Hugging Face Spaces, using the same lookup engine
 | `rules.json` | 52 rule records in the supplied schema, each with citation and verbatim quoted span |
 | `lookups.json` | Results for all 500 addresses as of 2026-10-01 |
 | `changes.json` | Affected addresses and conflict flags for T1 to T5 |
-| `rules_full.json` | Rules plus source doc, source URL, retrieval date, span verification and source type, for the UI and audit |
+| `rules_full.json` | Rules plus source doc, source URL, retrieval status, span verification and source type, for the UI and audit |
 | `audit_log.json` | Model, generation time, geocoder, as-of date, dropped duplicates, re-anchored rules, and per-document retrieval date, URL, token usage and skip reason |
 | `jurisdictions.json` | Census Geocoder result for every address |
 
@@ -70,7 +79,9 @@ The live demo runs `app.py` on Hugging Face Spaces, using the same lookup engine
 
 **Module A, extraction.** Each corpus document is sent to Claude (`claude-sonnet-5-5`) with the rule schema and asked for one record per rule. Every quoted span is matched back against the source text and snapped to the verbatim sentence (similarity 0.80 or higher, otherwise marked unverified). Rules are then deduplicated by subsection, filtered to the 13 in-scope jurisdictions, and collapsed to one rule per jurisdiction, category and status. Pending and failed items keep their own slots so T4 and T5 can see them. When two records compete for a slot, supplied corpus text beats self-saved pages, then verified spans, then official sources, then model confidence.
 
-**Module B, address lookup.** Each address goes through the U.S. Census Geocoder (Public_AR_Current, Incorporated Places layer). The postal city is never trusted: Dorchester, Roxbury, Allston, Brighton, East Boston and other neighborhoods resolve to Boston, San Ysidro resolves to San Diego, and one "Cambridge" mailing address is legally in Boston. Coverage tests check unit count, year built, certificate-of-occupancy cutoffs and owner type. Any test that depends on a fact the data lacks returns unknown with the reason. Stricter local rent and just-cause ordinances mark the state rule superseded.
+**Module B, address lookup.** Each address goes through the U.S. Census Geocoder (Public_AR_Current, Incorporated Places layer). The postal city is never trusted: Dorchester, Roxbury, Allston, Brighton, East Boston and other neighborhoods resolve to Boston, San Ysidro resolves to San Diego, and one "Cambridge" mailing address is legally in Boston. Coverage tests check unit count, year built, building age, certificate-of-occupancy cutoffs and owner type. Any test that depends on a fact the data lacks returns unknown with the reason. Stricter local rent and just-cause ordinances mark the state rule superseded.
+
+**Coverage fix found in testing.** Extraction missed the October 1, 1978 cutoff on two Los Angeles Rent Stabilization Ordinance rules (rent increases and deposit interest), so they were applying to newer buildings. Cell 4 adds that cutoff by rule (Los Angeles, rent or deposit topic, requirement mentions RSO), and a building built in 1978 itself comes back unknown because the exact certificate date isn't in the data.
 
 **Module C, change tracking.** The supplied T1 to T5 definitions are mapped to rule ids, and the lookup engine is rerun at each test's as-of dates.
 
@@ -78,10 +89,17 @@ The live demo runs `app.py` on Hugging Face Spaces, using the same lookup engine
 
 - Every interface says "not legal advice" and shows the as-of date.
 - Enacted, not-yet-effective, pending and failed law are kept separate.
-- Unknown is reported with a plain reason (owner data excluded 788, year built missing 245, legal city unconfirmed 193, unit count missing 110, local coverage unconfirmed 58).
+- Unknown is reported with a plain reason: owner data excluded 788, year built missing 257, legal city unconfirmed 193, unit count missing 110, local coverage unconfirmed 58, built in a cutoff year 4, other 1.
 - Conflicts between state and local algorithmic-pricing rules are flagged for human review.
-- 15 rules started from link-only pages we saved one at a time with a retrieval date (allowed by organizers). Before picking each slot's winner, the pipeline looks for the same sentence in the supplied corpus. 3 were re-anchored there; the other 12 stay tagged `self_saved_link_only` with confidence capped at 0.5.
+- 15 rules started from link-only pages we saved one at a time (allowed by organizers). Before picking each slot's winner, the pipeline looks for the same sentence in the supplied corpus. 3 were re-anchored there; the other 12 stay tagged `self_saved_link_only` with confidence capped at 0.5.
 - Duplicates are dropped by a rule, not by hand: a city-level pending proposal is dropped when that city already has an in-force law in the same category, and a repeat pending or failed record with the same citation is dropped. On this run that removed r-0048, r-0049 (proposed versions of San Diego Mun. Code §§ 98.1101 to 98.1104, already in force as r-0003), r-0056 (a news write-up of the Santa Ana ordinance in r-0004) and r-0016 (a second copy of the failed Boston bill H.3744). The dropped ids are written to `audit_log.json`.
+
+## Known limitations
+
+- Coverage is California, New Jersey and Massachusetts only.
+- Boston's Housing Stability Notification Act (a notice rule) is filed under just-cause eviction, so it marks the state 14-day notice rule superseded for Boston addresses. A reviewer should treat that as a category error, not a legal conclusion.
+- Owner type is deliberately excluded, so owner-dependent exemptions always come back unknown.
+- The live-address tab relies on the Census Geocoder being reachable and on building facts the user types in.
 
 ## Known open questions in the law
 
@@ -96,4 +114,9 @@ These are listed for human review. The pipeline stores one effective date per ru
 
 Add the new documents to the corpus and the addresses to the sample. Extraction, the geocoder (national) and the coverage engine run unchanged. Only the in-scope jurisdiction list and any new coverage fields need editing.
 
+## License
+
+MIT, per the Hack-Nation terms. See `LICENSE`.
+
 *Not legal advice. Summaries of law here are for a prototype.*
+Displaying README.md.
